@@ -18,14 +18,19 @@ Imports:
     stats,
     ggplot2,
     eulerr,
+    dplyr,
+    geomtextpath,
+    ggalt,
+    RColorBrewer,
     matrixcalc,
     tidyr,
+    tidyselect,
     effsize,
     nVennR,
     rlang,
     clusterGeneration,
     matrixStats
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2
 Suggests: 
     testthat (>= 3.0.0)
 Config/testthat/edition: 3

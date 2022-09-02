@@ -13,8 +13,8 @@
   savePlot = FALSE,
   xlim = c(0, 1),
   samereps = TRUE,
-  cutoff = rep(0.1, length(whichfit)),
-  lower.tail = rep(TRUE, length(whichfit)),
+  cutoff = NULL,
+  lower.tail = NULL,
   mod.lab = NULL,
   mod.brewer.pal = "Set1"
 )
@@ -47,12 +47,11 @@ is not yet operational.}
 see \code{\link[RColorBrewer]{display.brewer.all}}.}
 }
 \description{
-Plot function for fitprop objects
+`plot()` returns a plot (of type ECDF, Euler, or UpSet) for each requested fit index saved in an object of class fitprop.
 }
 \examples{
 \donttest{
 
-library(ggplot2)
 # Set up a covariance matrix to fit models to
 p<-3 # number of variables
 temp_mat <- diag(p) # identity matrix
@@ -67,11 +66,10 @@ mod2a <- 'V3 ~ V1
 mod1a.fit <- sem(mod1a, sample.cov=temp_mat, sample.nobs=500)
 mod2a.fit <- sem(mod2a, sample.cov=temp_mat, sample.nobs=500)
 
-# Run fit propensity analysis
+# Run fit propensity analysis (50 reps to save time)
 # Onion approach, save srmr and CFI
 res <- run.fitprop(mod1a.fit, mod2a.fit, fit.measure=c("srmr","cfi"),
-  rmethod="onion",reps=1000)
-summary(res)
+  rmethod="onion",reps=50)
 
 # Generate a variety of plots
 # ecdf - only srmr
@@ -80,17 +78,18 @@ plot(res, whichfit = "srmr")
 # ecdf - both srmr and cfi, properly indicating that higher values of cfi are better
 plot(res, lower.tail=c(TRUE,FALSE))
 
-# ecdf change color palette, save plot to object, then display or change
-myplot<-plot(res, whichfit="cfi",
-             lower.tail=FALSE,
-             mod.brewer.pal="Dark2",
-             savePlot=TRUE)
-myplot[[1]] # saved to the first slot
-myplot[[1]] + theme_bw() # change something, like the theme
+# Generate Euler plot
+plot(res, type = "euler", whichfit = "srmr", cutoff = .08, lower.tail = TRUE)
 
-# euler plot
-# cfi - which models have cfi of .5 or better?
-plot(res, type="euler", whichfit="cfi", lower.tail=FALSE, cutoff=.5)
+# Change color palette, save plot to object, then display or change
+myplot <- plot(res, type = "euler", whichfit="cfi",
+             lower.tail = FALSE,
+             cutoff = .95,
+             mod.brewer.pal = "Dark2",
+             savePlot = TRUE)
+myplot[[1]] # saved to the first slot
+myplot[[1]] + labs(subtitle = "Two Regression Models") # change something, like add a subtitle
+
 
 }
 }
