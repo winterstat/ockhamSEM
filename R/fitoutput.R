@@ -309,10 +309,6 @@ ecdf.fitprop <- function(x,
 
   if (!is.null(cutoff)) {
 
-    if(length(whichfit) != length(cutoff)) {
-      message("'whichfit' and 'cutoff' do not match in number of elements. Mismatch may exist.")
-    }
-
     graph <- graph + geom_segment(
       aes(
         x = cutoff[m],

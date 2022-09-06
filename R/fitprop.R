@@ -468,6 +468,10 @@ plot.fitprop <-
         )
 
       } else if (type == "ecdf") {
+        if(!is.null(cutoff) & length(whichfit) != length(cutoff)) {
+          message("'whichfit' and 'cutoff' do not match in number of elements. Mismatch may exist.")
+        }
+
         graph <- ecdf.fitprop(
           x = dat,
           whichmod = whichmod,
