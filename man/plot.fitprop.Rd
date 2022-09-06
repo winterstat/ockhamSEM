@@ -7,7 +7,7 @@
 \method{plot}{fitprop}(
   x,
   ...,
-  type = c("ecdf", "euler", "nVennR"),
+  type = c("ecdf", "euler", "ranks", "pairwise", "nVennR"),
   whichmod = NULL,
   whichfit = colnames(x$fit_list[[1]]),
   savePlot = FALSE,
@@ -45,6 +45,8 @@ is not yet operational.}
 
 \item{mod.brewer.pal}{Optional string corresponding to the palette from RColorBrewer to use for the different models. e.g.,
 see \code{\link[RColorBrewer]{display.brewer.all}}.}
+
+\item{ties.method}{Optional character value for use with \code{type = "rank"} specifying method indicating the method for treating ties in the rank function (see \code{\link[base]{rank}}).}
 }
 \description{
 `plot()` returns a plot (of type ECDF, Euler, or UpSet) for each requested fit index saved in an object of class fitprop.
@@ -90,6 +92,11 @@ myplot <- plot(res, type = "euler", whichfit="cfi",
 myplot[[1]] # saved to the first slot
 myplot[[1]] + labs(subtitle = "Two Regression Models") # change something, like add a subtitle
 
+# Rank models according to fitting propensity at different cutoff values
+plot(res, type = "ranks", lower.tail = c(TRUE, FALSE))
+
+# Compare FP of two models across range of fit index
+plot(res, type = "pairwise", whichmod = c(1,2), lower.tail = c(TRUE, FALSE))
 
 }
 }

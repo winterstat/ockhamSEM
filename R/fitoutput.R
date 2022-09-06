@@ -1,4 +1,4 @@
-# Fitting Propensity Plot Functions
+# Fitting Propensity Plot and Table Functions
 
 #' Euler Plot of fitting propensity for a specific fit index
 #'
@@ -35,6 +35,9 @@ euler.fitprop <- function(x,
                           lower.tail = NULL,
                           mod.lab = NULL,
                           mod.brewer.pal = "Set1") {
+  # Define binding for global variables (to avoid note)
+  model <- label_text <- NULL
+
   dat <- x
   nmod <- ncol(dat) - 1
   nrep <- nrow(dat)
@@ -140,14 +143,12 @@ euler.fitprop <- function(x,
 
   # Filter points so that only those inside the "complete data space" circle remain
   # Points that are in the circle are: (x - h)^2 + (y - k)^2 < R^2
-  combi.xy$r2 <-(combi.xy$Var1 - eulerfit$ellipses[1, 1])^2 + (combi.xy$Var2 - eulerfit$ellipses[1, 2])^2
+  combi.xy$r2 <- (combi.xy$Var1 - eulerfit$ellipses[1, 1])^2 + (combi.xy$Var2 - eulerfit$ellipses[1, 2])^2
 
   combi.xy <- dplyr::filter(combi.xy, .data$r2 < eulerfit$ellipses[1, 3]^2)
 
   line.pal <- c("dashed", "dotted", "dotdash", "longdash", "twodash")
   line.pal <- rep_len(line.pal, nmod)
-  #color.pal <- RColorBrewer::brewer.pal(n = max(3, nmod), name = mod.brewer.pal)
-  #fill.pal <- RColorBrewer::brewer.pal(n = max(3, nmod), name = mod.brewer.pal)
   color.pal <- brewer.pal(n = max(3, nmod), name = mod.brewer.pal)
   fill.pal <-  brewer.pal(n = max(3, nmod), name = mod.brewer.pal)
 
@@ -179,7 +180,7 @@ euler.fitprop <- function(x,
                alpha = .3,
                size = .1) +
     geom_encircle(
-    #ggalt::geom_encircle(
+      #ggalt::geom_encircle(
       data = all.ellipse,
       aes(
         x = x,
@@ -205,7 +206,7 @@ euler.fitprop <- function(x,
                     ylim = range.y,
                     expand = TRUE) +
     geom_textpath(
-    #geomtextpath::geom_textpath(
+      #geomtextpath::geom_textpath(
       data = text_curve,
       aes(x = x, y = y, label = label_text),
       text_only = TRUE,
@@ -262,6 +263,7 @@ euler.fitprop <- function(x,
 #'
 #' @export
 #' @import ggplot2
+#' @importFrom stats ecdf
 #' @importFrom rlang .data
 #' @importFrom dplyr filter
 #' @importFrom tidyr gather
@@ -388,10 +390,10 @@ intersect.fitprop <- function(x,
                               whichmod = NULL,
                               whichfit = colnames(x$fit_list[[1]]),
                               samereps = TRUE,
-                         cutoff = NULL,
-                         lower.tail = NULL,
-                         mod.lab = NULL,
-                         saveTable = FALSE) {
+                              cutoff = NULL,
+                              lower.tail = NULL,
+                              mod.lab = NULL,
+                              saveTable = FALSE) {
   if (class(x) != "fitprop") {
     stop('At this time, this function can only handle objects of class fitprop')
   }
@@ -439,66 +441,66 @@ intersect.fitprop <- function(x,
     colnames(dat) <- mod.lab
     dat$id <- 1:nrow(dat)
 
-  # Categorize fit index values
-  if (lower.tail[m]) {
-    dat[, whichmod] <-
-      dat[, whichmod] < cutoff[m] # how many meet cutoff criterion
-  } else {
-    dat[, whichmod] <-
-      dat[, whichmod] > cutoff[m] # how many meet cutoff criterion
-  }
-
-
-  # Extract just the selected models
-  tmp <- dat[, whichmod]
-
-  # If samereps, then omit if not all reps converged
-  if (samereps) {
-    tmp <- na.omit(tmp)
-  }
-
-  # Add column names for models
-  colnames(tmp) <- mod.lab
-
-  # Add column for models that never fit
-  tmp$None <- rowSums(tmp[,mod.lab]) == 0
-
-  # Set up order of intersections
-  # Find out how often each intersection occurs
-  #order_intersect <- dplyr::count(dplyr::group_by_all(tmp))
-
-  order_intersect <- count(group_by_all(tmp))
-
-
-  # Find out which models are involved with each intersection and list them with commas
-  intersect <- unique(apply(order_intersect[,-c(ncol(order_intersect))], 1,
-                            function(r) paste(names(order_intersect[,-c(ncol(order_intersect))])[as.logical(r)], collapse = ", "))
-  )
-
-  order_intersect <- cbind(order_intersect, intersect = intersect)
-  order_intersect$num_comma <- sapply(order_intersect$intersect, function(x) length(strsplit(x, ",")[[1]]))
-
-  freq_order <- order(order_intersect$num_comma, order(order_intersect$n, decreasing = TRUE), decreasing = FALSE)
-  order_intersect <- order_intersect[freq_order,c("intersect", "n")]
-
-  order_intersect$proportion <- order_intersect$n / nrow(tmp)
-
-  names <- order_intersect$intersect
-  order_intersect <- as.matrix(order_intersect[,2:3])
-
-  row.names(order_intersect) <- names
-
-  tables[[m]] <- order_intersect
-
-
-  # do something with plot
-  if (saveTable) {
-    tables[[m]] <- order_intersect
-  } else {
-    cat(paste0("\nIntersections for ", toupper(fm), "\n\n"))
-    print.default(round(order_intersect, 3))
+    # Categorize fit index values
+    if (lower.tail[m]) {
+      dat[, whichmod] <-
+        dat[, whichmod] < cutoff[m] # how many meet cutoff criterion
+    } else {
+      dat[, whichmod] <-
+        dat[, whichmod] > cutoff[m] # how many meet cutoff criterion
     }
-  m <- m + 1
+
+
+    # Extract just the selected models
+    tmp <- dat[, whichmod]
+
+    # If samereps, then omit if not all reps converged
+    if (samereps) {
+      tmp <- na.omit(tmp)
+    }
+
+    # Add column names for models
+    colnames(tmp) <- mod.lab
+
+    # Add column for models that never fit
+    tmp$None <- rowSums(tmp[,mod.lab]) == 0
+
+    # Set up order of intersections
+    # Find out how often each intersection occurs
+    #order_intersect <- dplyr::count(dplyr::group_by_all(tmp))
+
+    order_intersect <- count(group_by_all(tmp))
+
+
+    # Find out which models are involved with each intersection and list them with commas
+    intersect <- unique(apply(order_intersect[,-c(ncol(order_intersect))], 1,
+                              function(r) paste(names(order_intersect[,-c(ncol(order_intersect))])[as.logical(r)], collapse = ", "))
+    )
+
+    order_intersect <- cbind(order_intersect, intersect = intersect)
+    order_intersect$num_comma <- sapply(order_intersect$intersect, function(x) length(strsplit(x, ",")[[1]]))
+
+    freq_order <- order(order_intersect$num_comma, order(order_intersect$n, decreasing = TRUE), decreasing = FALSE)
+    order_intersect <- order_intersect[freq_order,c("intersect", "n")]
+
+    order_intersect$proportion <- order_intersect$n / nrow(tmp)
+
+    names <- order_intersect$intersect
+    order_intersect <- as.matrix(order_intersect[,2:3])
+
+    row.names(order_intersect) <- names
+
+    tables[[m]] <- order_intersect
+
+
+    # do something with plot
+    if (saveTable) {
+      tables[[m]] <- order_intersect
+    } else {
+      cat(paste0("\nIntersections for ", toupper(fm), "\n\n"))
+      print.default(round(order_intersect, 3))
+    }
+    m <- m + 1
   }
 
   if (saveTable) {
@@ -506,5 +508,202 @@ intersect.fitprop <- function(x,
     tables <- setNames(tables, whichfit)
   }
 
+
+}
+
+
+#' Plot of fitting propensity rankings for a specific fit index across cutoff values
+#'
+#' @param x Data frame of specific fit index values extracted from object of class fitprop, as created by run.fitprop function.
+#' @param m Integer value indicating location of fit index in list of fit indices to plot
+#' @param fm Character value indicating which fit index to plot
+#' @param whichmod Index number corresponding to which model(s) to include on the plot. Defaults to all models.
+#' @param savePlot Logical value indicating whether to save plot to a list (TRUE) or just produce plot to output.
+#' @param xlim Numeric vector of length 2 indicating the limits for the x-axis of the plot.
+#' @param samereps Logical value indicating whether to use only results from replications in which all selected models yielded results.
+#' @param cutoff Optional numeric vector indicating what cut value of the fit indice(s) to use. When not specified, no cutoff line is included in resulting plots.
+#' @param lower.tail Logical vector indicating whether lower values of each fit index corresponds to good fit.
+#' @param mod.lab Optional character vector of labels for each model.
+#' @param ties.method Character value indicating the method for treating ties in the rank function (see \code{\link[base]{rank}}).
+#' @param mod.brewer.pal Optional string corresponding to the palette from RColorBrewer to use for the different models. e.g.,
+#'   see \code{\link[RColorBrewer]{display.brewer.all}}.
+#'
+#' @returns A ggplot object of the rankings plot.
+#'
+#'
+#' @export
+#' @import ggplot2
+#' @importFrom stats ecdf
+#' @importFrom rlang .data
+#' @importFrom tidyr pivot_longer
+#' @importFrom RColorBrewer brewer.pal
+
+ranks.fitprop <- function(x,
+                          m = m,
+                          fm = fm,
+                          whichmod = NULL,
+                          savePlot = FALSE,
+                          xlim = c(0, 1),
+                          samereps = TRUE,
+                          cutoff = NULL,
+                          lower.tail = NULL,
+                          mod.lab = NULL,
+                          ties.method = "min",
+                          mod.brewer.pal = "Set1") {
+  # Define binding for global variables (to avoid note)
+  name <- NULL
+
+  dat <- x
+  dat <- dat[, whichmod]
+  nmod <- ncol(dat)
+  nrep <- nrow(dat)
+
+  if (samereps) {
+    dat <- na.omit(dat)
+  }
+
+  xseq <- seq(0, 1, .05)
+
+  tmp <- data.frame(xseq)
+  for(j in 1:nmod) {
+    tmp[,j] <- ecdf(dat[,j])(xseq)
+
+  }
+
+  if(lower.tail[m]) {
+    ranks <- t(apply(-tmp, 1, rank, ties.method = ties.method))
+  } else {
+    ranks <- t(apply(tmp, 1, rank, ties.method = ties.method))
+  }
+
+  ranks <- data.frame(ranks, xseq)
+  colnames(ranks) <- c(mod.lab, "xseq")
+  ranks <- pivot_longer(ranks, cols = -xseq, values_to = "rank")
+
+  graph <- ggplot(ranks, aes(x = xseq, y = rank, group = name)) +
+    geom_line(aes(color = name), alpha = .6, size = 2) +
+    geom_point(aes(color = name), alpha = .6, size = 4) +
+    geom_point(color = "#FFFFFF", size = 1) +
+    scale_y_reverse(breaks = 1:nmod) +
+    labs(x = paste0(toupper(fm), " cutoff"),
+         y = "Fitting Propensity Rank") +
+    scale_color_brewer(palette = mod.brewer.pal) +
+    guides(color = guide_legend(title = "Model")) +
+    theme_bw() +
+    theme(
+      legend.position = "bottom",
+      legend.title = element_blank(),
+      legend.text = element_text(size = 10),
+      text = element_text(family = "sans"),
+      panel.grid.minor = element_blank(),
+      panel.grid.major.y = element_blank(),
+      panel.grid.minor.y = element_blank(),
+      axis.ticks = element_blank(),
+      axis.text.y = element_text(size = 10),
+      panel.border = element_blank()
+    )
+
+  if (lower.tail[m]) {
+    graph <- graph + scale_x_continuous(limits = c(xlim[1], xlim[2]), breaks = xseq)
+  } else {
+    graph <- graph + scale_x_reverse(limits = c(xlim[2], xlim[1]), breaks = xseq)
+  }
+
+  graph
+
+  return(graph)
+}
+
+#' Plot of pairwise fitting propensity for a specific fit index across possible values
+#'
+#' @param x Data frame of specific fit index values extracted from object of class fitprop, as created by run.fitprop function.
+#' @param m Integer value indicating location of fit index in list of fit indices to plot
+#' @param fm Character value indicating which fit index to plot
+#' @param whichmod Index number corresponding to which model(s) to include on the plot. Defaults to all models.
+#' @param savePlot Logical value indicating whether to save plot to a list (TRUE) or just produce plot to output.
+#' @param xlim Numeric vector of length 2 indicating the limits for the x-axis of the plot.
+#' @param samereps Logical value indicating whether to use only results from replications in which all selected models yielded results.
+#' @param cutoff Optional numeric vector indicating what cut value of the fit indice(s) to use. When not specified, no cutoff line is included in resulting plots.
+#' @param lower.tail Logical vector indicating whether lower values of each fit index corresponds to good fit.
+#' @param mod.lab Optional character vector of labels for each model.
+#' @param mod.brewer.pal Optional string corresponding to the palette from RColorBrewer to use for the different models. e.g.,
+#'   see \code{\link[RColorBrewer]{display.brewer.all}}.
+#'
+#' @returns A ggplot object of the pairwise FP comparison plot
+#'
+#'
+#' @export
+#' @import ggplot2
+#' @importFrom stats ecdf
+#' @importFrom rlang .data
+#' @importFrom dplyr filter
+#' @importFrom RColorBrewer brewer.pal
+
+pairwise.fitprop <- function(x,
+                             m = m,
+                             fm = fm,
+                             whichmod = NULL,
+                             savePlot = FALSE,
+                             xlim = c(0, 1),
+                             samereps = TRUE,
+                             cutoff = NULL,
+                             lower.tail = NULL,
+                             mod.lab = NULL,
+                             mod.brewer.pal = "Set1") {
+
+  # Define binding for global variables (to avoid note)
+  ymax <- group <- NULL
+
+  dat <- x
+  dat <- dat[, whichmod]
+  nmod <- ncol(dat)
+  nrep <- nrow(dat)
+
+  # From here on is ECDF specific code
+  if (samereps) {
+    dat <- na.omit(dat)
+  }
+
+  color.pal <- brewer.pal(n = max(3, nmod), name = mod.brewer.pal)
+
+  xseq <- seq(0, 1, .001)
+
+  if(lower.tail[m]) {
+    decdf <- ecdf(dat[,1])(xseq) - ecdf(dat[,2])(xseq)
+  } else {
+    decdf <- ecdf(dat[,2])(xseq) - ecdf(dat[,1])(xseq)
+  }
+
+  tmp <- data.frame("xseq" = xseq, "decdf" = decdf)
+  fp_prefer <- data.frame(ymax = c(Inf, -Inf), group = mod.lab)
+
+  graph <- ggplot() +
+    geom_rect(data = fp_prefer, aes(xmin = 0, xmax = 1, ymin = 0, ymax = ymax, fill = group), alpha = .5) +
+    scale_fill_brewer(name = "Model with\nhigher FP", palette = "Greys") +
+    geom_line(data = tmp, aes(x = xseq, y = decdf),
+              color = color.pal[1], size = 0.8) +
+    labs(x = paste0(toupper(fm), " value"),
+         y = "Difference in Cumulative Density") +
+    theme_bw() +
+    theme(
+      legend.position = "right",
+      legend.text = element_text(size = 10),
+      text = element_text(family = "sans"),
+      panel.grid.minor = element_blank(),
+      panel.grid.major.y = element_blank(),
+      panel.grid.minor.y = element_blank(),
+      axis.ticks = element_blank(),
+      axis.text.y = element_text(size = 10),
+      panel.border = element_blank()
+    )
+
+  if (lower.tail[m]) {
+    graph <- graph + scale_x_continuous(breaks = seq(xlim[1], xlim[2], .1))
+  } else {
+    graph <- graph + scale_x_reverse(breaks = seq(xlim[1], xlim[2], .1))
+  }
+
+
+  return(graph)
 
 }

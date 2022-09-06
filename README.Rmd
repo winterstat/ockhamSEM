@@ -19,12 +19,14 @@ ockhamSEM is an R package for studying the fit propensity of single-group struct
 
 The package is introduced in Falk and Muthukrishna (2020) Parsimony in Model Selection: Tools for Assessing Fit Propensity.
 
+This version of ockhamSEM includes alternative graph and table outputs. The figures shown below are part of the original ockhamSEM package, not the new ones.
+
 ## Installation
 
 ```{r, eval = FALSE}
 # From GitHub:
 # install.packages("devtools")
-devtools::install_github("falkcarl/ockhamSEM")
+devtools::install_github("winterstat/ockhamSEM")
 ```
 
 ## Usage

@@ -325,6 +325,7 @@ run.fitprop <- function(...,
 #' @param cutoff Numeric vector indicating what cut value of the fit indice(s) to use for euler plots.
 #' @param lower.tail Logical vector indicating whether lower values of each fit index corresponds to good fit.
 #' @param mod.lab Optional character vector of labels for each model.
+#' @param ties.method Optional character value for use with \code{type = "rank"} specifying method indicating the method for treating ties in the rank function (see \code{\link[base]{rank}}).
 #' @param mod.brewer.pal Optional string corresponding to the palette from RColorBrewer to use for the different models. e.g.,
 #'   see \code{\link[RColorBrewer]{display.brewer.all}}.
 #' @examples
@@ -368,6 +369,11 @@ run.fitprop <- function(...,
 #' myplot[[1]] # saved to the first slot
 #' myplot[[1]] + labs(subtitle = "Two Regression Models") # change something, like add a subtitle
 #'
+#' # Rank models according to fitting propensity at different cutoff values
+#' plot(res, type = "ranks", lower.tail = c(TRUE, FALSE))
+#'
+#' # Compare FP of two models across range of fit index
+#' plot(res, type = "pairwise", whichmod = c(1,2), lower.tail = c(TRUE, FALSE))
 #'
 #' }
 #' @export
@@ -378,7 +384,7 @@ run.fitprop <- function(...,
 plot.fitprop <-
   function(x,
            ...,
-           type = c("ecdf", "euler", "nVennR"),
+           type = c("ecdf", "euler", "ranks", "pairwise", "nVennR"),
            whichmod = NULL,
            whichfit = colnames(x$fit_list[[1]]),
            savePlot = FALSE,
@@ -465,6 +471,41 @@ plot.fitprop <-
           mod.lab = mod.lab,
           mod.brewer.pal = mod.brewer.pal
         )
+      } else if (type == "ranks") {
+        graph <- ranks.fitprop(
+          x = dat,
+          whichmod = whichmod,
+          m = m,
+          fm = fm,
+          savePlot = savePlot,
+          xlim = xlim,
+          samereps = samereps,
+          cutoff = cutoff,
+          lower.tail = lower.tail,
+          mod.lab = mod.lab,
+          ties.method = ties.method,
+          mod.brewer.pal = mod.brewer.pal
+        )
+      } else if (type == "pairwise") {
+        # If no cutoff values are specified, set defaults and send message to user
+        if(length(whichmod) != 2) {
+          stop("Pairwise  plot only available for comparing 2 models at a time. Make sure 'whichmod' consists of 2 models.")
+        }
+
+        graph <- pairwise.fitprop(
+          x = dat,
+          whichmod = whichmod,
+          m = m,
+          fm = fm,
+          savePlot = savePlot,
+          xlim = xlim,
+          samereps = samereps,
+          cutoff = cutoff,
+          lower.tail = lower.tail,
+          mod.lab = mod.lab,
+          mod.brewer.pal = mod.brewer.pal
+        )
+
       } else if (type == "nVennR") {
         stop("nVennR is not yet functional")
       }
@@ -484,7 +525,7 @@ plot.fitprop <-
     if (savePlot) {
       invisible(plots)
     }
-}
+  }
 
 #' @export
 print.fitprop<-function(x,...){
@@ -494,16 +535,16 @@ print.fitprop<-function(x,...){
   nrep<-x$reps # number of available replications
 
   cat(
-"\n",
-#"Function call =           ", deparse(x$fun.call), "\n",
-"Number of fitted models = ", nmod, "\n",
-"Number of fit measures =  ", nfit, "\n",
-"Fit measures =            ", colnames(data[[1]]), "\n",
-"Number of replications =   ", nrep, "\n",
-"Options for R generation\n",
-"  method =                ", x$rmethod, "\n",
-"  Only positive R?        ", x$onlypos, "\n"
-)
+    "\n",
+    #"Function call =           ", deparse(x$fun.call), "\n",
+    "Number of fitted models = ", nmod, "\n",
+    "Number of fit measures =  ", nfit, "\n",
+    "Fit measures =            ", colnames(data[[1]]), "\n",
+    "Number of replications =   ", nrep, "\n",
+    "Options for R generation\n",
+    "  method =                ", x$rmethod, "\n",
+    "  Only positive R?        ", x$onlypos, "\n"
+  )
 
 }
 
