@@ -12,7 +12,6 @@ ranks.fitprop(
   savePlot = FALSE,
   xlim = c(0, 1),
   samereps = TRUE,
-  cutoff = NULL,
   lower.tail = NULL,
   mod.lab = NULL,
   ties.method = "min",
@@ -33,8 +32,6 @@ ranks.fitprop(
 \item{xlim}{Numeric vector of length 2 indicating the limits for the x-axis of the plot.}
 
 \item{samereps}{Logical value indicating whether to use only results from replications in which all selected models yielded results.}
-
-\item{cutoff}{Optional numeric vector indicating what cut value of the fit indice(s) to use. When not specified, no cutoff line is included in resulting plots.}
 
 \item{lower.tail}{Logical vector indicating whether lower values of each fit index corresponds to good fit.}
 

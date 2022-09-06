@@ -415,12 +415,18 @@ plot.fitprop <-
       mod.lab <- paste0("Model ", whichmod)
     }
 
+    if(!is.null(lower.tail) & length(whichfit) != length(lower.tail)) {
+      message("'whichfit' and 'lower.tail' do not match in number of elements. Mismatch may exist.")
+    }
+
     if (is.null(lower.tail)) {
       lower.tail <- rep(TRUE, length(whichfit))
       message(
         "By default, lower tail indicates good fit. Use argument 'lower.tail' to adjust this value per fit index."
       )
     }
+
+
 
     plots <- list()
     # loop over fit indices
@@ -438,6 +444,10 @@ plot.fitprop <-
       dat$id <- 1:nrow(dat)
 
       if (type == "euler") {
+        if(!is.null(cutoff) & length(whichfit) != length(cutoff)) {
+          message("'whichfit' and 'cutoff' do not match in number of elements. Mismatch may exist.")
+        }
+
         # If no cutoff values are specified, set defaults and send message to user
         if(is.null(cutoff)) {
           cutoff <- rep(.1, length(whichfit))
@@ -480,7 +490,6 @@ plot.fitprop <-
           savePlot = savePlot,
           xlim = xlim,
           samereps = samereps,
-          cutoff = cutoff,
           lower.tail = lower.tail,
           mod.lab = mod.lab,
           ties.method = ties.method,
@@ -500,7 +509,6 @@ plot.fitprop <-
           savePlot = savePlot,
           xlim = xlim,
           samereps = samereps,
-          cutoff = cutoff,
           lower.tail = lower.tail,
           mod.lab = mod.lab,
           mod.brewer.pal = mod.brewer.pal

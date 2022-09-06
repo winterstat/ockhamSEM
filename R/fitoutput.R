@@ -308,6 +308,11 @@ ecdf.fitprop <- function(x,
   }
 
   if (!is.null(cutoff)) {
+
+    if(length(whichfit) != length(cutoff)) {
+      message("'whichfit' and 'cutoff' do not match in number of elements. Mismatch may exist.")
+    }
+
     graph <- graph + geom_segment(
       aes(
         x = cutoff[m],
@@ -413,11 +418,19 @@ intersect.fitprop <- function(x,
     mod.lab <- paste0("Model ", whichmod)
   }
 
+  if(!is.null(lower.tail) & length(whichfit) != length(lower.tail)) {
+    message("'whichfit' and 'lower.tail' do not match in number of elements. Mismatch may exist.")
+  }
+
   if (is.null(lower.tail)) {
     lower.tail <- rep(TRUE, length(whichfit))
     message(
       "By default, lower tail indicates good fit. Use argument 'lower.tail' to adjust this value per fit index."
     )
+  }
+
+  if(!is.null(cutoff) & length(whichfit) != length(cutoff)) {
+    message("'whichfit' and 'cutoff' do not match in number of elements. Mismatch may exist.")
   }
 
   # If no cutoff values are specified, set defaults and send message to user
@@ -521,7 +534,6 @@ intersect.fitprop <- function(x,
 #' @param savePlot Logical value indicating whether to save plot to a list (TRUE) or just produce plot to output.
 #' @param xlim Numeric vector of length 2 indicating the limits for the x-axis of the plot.
 #' @param samereps Logical value indicating whether to use only results from replications in which all selected models yielded results.
-#' @param cutoff Optional numeric vector indicating what cut value of the fit indice(s) to use. When not specified, no cutoff line is included in resulting plots.
 #' @param lower.tail Logical vector indicating whether lower values of each fit index corresponds to good fit.
 #' @param mod.lab Optional character vector of labels for each model.
 #' @param ties.method Character value indicating the method for treating ties in the rank function (see \code{\link[base]{rank}}).
@@ -545,7 +557,6 @@ ranks.fitprop <- function(x,
                           savePlot = FALSE,
                           xlim = c(0, 1),
                           samereps = TRUE,
-                          cutoff = NULL,
                           lower.tail = NULL,
                           mod.lab = NULL,
                           ties.method = "min",
@@ -623,7 +634,6 @@ ranks.fitprop <- function(x,
 #' @param savePlot Logical value indicating whether to save plot to a list (TRUE) or just produce plot to output.
 #' @param xlim Numeric vector of length 2 indicating the limits for the x-axis of the plot.
 #' @param samereps Logical value indicating whether to use only results from replications in which all selected models yielded results.
-#' @param cutoff Optional numeric vector indicating what cut value of the fit indice(s) to use. When not specified, no cutoff line is included in resulting plots.
 #' @param lower.tail Logical vector indicating whether lower values of each fit index corresponds to good fit.
 #' @param mod.lab Optional character vector of labels for each model.
 #' @param mod.brewer.pal Optional string corresponding to the palette from RColorBrewer to use for the different models. e.g.,
@@ -646,7 +656,6 @@ pairwise.fitprop <- function(x,
                              savePlot = FALSE,
                              xlim = c(0, 1),
                              samereps = TRUE,
-                             cutoff = NULL,
                              lower.tail = NULL,
                              mod.lab = NULL,
                              mod.brewer.pal = "Set1") {
