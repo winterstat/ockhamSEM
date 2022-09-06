@@ -162,9 +162,9 @@ euler.fitprop <- function(x,
   caption.text = paste0("* Approximated by ",format(num.datasets, big.mark = ",", trim = TRUE)," random datasets.")
 
   if (lower.tail[m] == FALSE) {
-    caption.text = paste0(caption.text, " Fit based on ", fm, " \u2265 ", cutoff[m], ".")
+    caption.text = paste0(caption.text, " Fit based on ", toupper(fm), " \u2265 ", cutoff[m], ".")
   } else if (lower.tail[m] == TRUE) {
-    caption.text = paste0(caption.text, " Fit based on ", fm, " \u2264 ", cutoff[m], ".")
+    caption.text = paste0(caption.text, " Fit based on ", toupper(fm), " \u2264 ", cutoff[m], ".")
   }
 
   # Get coordinates for Complete data space label
