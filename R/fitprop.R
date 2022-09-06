@@ -408,11 +408,14 @@ plot.fitprop <-
     if (is.null(whichfit)) {
       whichfit <- colnames(data[[1]])
     }
+    if (!is.null(whichmod) & is.null(mod.lab)) {
+      mod.lab <- paste0("Model ", whichmod)
+    } else if(is.null(whichmod) & is.null(mod.lab)) {
+      mod.lab <- paste0("Model ", 1:nmod)
+    }
+
     if (is.null(whichmod)) {
       whichmod <- 1:nmod
-    }
-    if (is.null(mod.lab)) {
-      mod.lab <- paste0("Model ", whichmod)
     }
 
     if(!is.null(lower.tail) & length(whichfit) != length(lower.tail)) {
@@ -440,8 +443,9 @@ plot.fitprop <-
         j <- j + 1
       }
       dat <- as.data.frame(dat)
+      dat <- dat[, whichmod]
       colnames(dat) <- mod.lab
-      dat$id <- 1:nrow(dat)
+      #dat$id <- 1:nrow(dat)
 
       if (type == "euler") {
         if(!is.null(cutoff) & length(whichfit) != length(cutoff)) {

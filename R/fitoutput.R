@@ -39,21 +39,33 @@ euler.fitprop <- function(x,
   model <- label_text <- NULL
 
   dat <- x
-  nmod <- ncol(dat) - 1
+  #nmod <- ncol(dat) - 1
+  nmod <- ncol(dat)
   nrep <- nrow(dat)
 
   # Categorize fit index values
+  # if (lower.tail[m]) {
+  #   dat[, whichmod] <-
+  #     dat[, whichmod] < cutoff[m] # how many meet cutoff criterion
+  # } else {
+  #   dat[, whichmod] <-
+  #     dat[, whichmod] > cutoff[m] # how many meet cutoff criterion
+  # }
+  #
   if (lower.tail[m]) {
-    dat[, whichmod] <-
-      dat[, whichmod] < cutoff[m] # how many meet cutoff criterion
+    dat <-
+      dat < cutoff[m] # how many meet cutoff criterion
   } else {
-    dat[, whichmod] <-
-      dat[, whichmod] > cutoff[m] # how many meet cutoff criterion
+    dat <-
+      dat > cutoff[m] # how many meet cutoff criterion
   }
 
   # Add column representing full data space
+  #tmp <-
+  #  cbind(data.frame(Total = rep(TRUE, nrow(dat))), dat[, whichmod])
+
   tmp <-
-    cbind(data.frame(Total = rep(TRUE, nrow(dat))), dat[, whichmod])
+    cbind(data.frame(Total = rep(TRUE, nrow(dat))), dat)
 
   # If samereps, then omit if not all reps converged
   if (samereps) {
@@ -61,7 +73,7 @@ euler.fitprop <- function(x,
   }
 
   # Add column names for models
-  colnames(tmp) <- c("Total", mod.lab)
+  # colnames(tmp) <- c("Total", mod.lab)
 
   # Find percentage of total data space that each model fits
   perc.fit <- apply(tmp, 2, mean)
@@ -266,7 +278,7 @@ euler.fitprop <- function(x,
 #' @importFrom stats ecdf
 #' @importFrom rlang .data
 #' @importFrom dplyr filter
-#' @importFrom tidyr gather
+#' @importFrom tidyr pivot_longer
 #' @importFrom tidyselect all_of
 #' @importFrom RColorBrewer brewer.pal
 
@@ -282,14 +294,16 @@ ecdf.fitprop <- function(x,
                          mod.lab = NULL,
                          mod.brewer.pal = "Set1") {
   dat <- x
-  nmod <- ncol(dat) - 1
+  #nmod <- ncol(dat) - 1
+  nmod <- ncol(dat)
   nrep <- nrow(dat)
 
   # From here on is ECDF specific code
   if (samereps) {
     dat <- na.omit(dat)
   }
-  dat <- gather(dat, "variable", "value", all_of(whichmod))
+  #dat <- gather(dat, "variable", "value", all_of(whichmod))
+  dat <- pivot_longer(dat, cols = all_of(mod.lab), names_to = "variable", values_to = "value")
 
   graph <- ggplot(dat, aes(x = .data$value)) +
     stat_ecdf(
@@ -407,11 +421,15 @@ intersect.fitprop <- function(x,
   if (is.null(whichfit)) {
     whichfit <- colnames(data[[1]])
   }
+
+  if (!is.null(whichmod) & is.null(mod.lab)) {
+    mod.lab <- paste0("Model ", whichmod)
+  } else if(is.null(whichmod) & is.null(mod.lab)) {
+    mod.lab <- paste0("Model ", 1:nmod)
+  }
+
   if (is.null(whichmod)) {
     whichmod <- 1:nmod
-  }
-  if (is.null(mod.lab)) {
-    mod.lab <- paste0("Model ", whichmod)
   }
 
   if(!is.null(lower.tail) & length(whichfit) != length(lower.tail)) {
@@ -447,21 +465,31 @@ intersect.fitprop <- function(x,
       j <- j + 1
     }
     dat <- as.data.frame(dat)
+    dat <- dat[,whichmod]
     colnames(dat) <- mod.lab
-    dat$id <- 1:nrow(dat)
+    #dat$id <- 1:nrow(dat)
 
     # Categorize fit index values
+    # if (lower.tail[m]) {
+    #   dat[, whichmod] <-
+    #     dat[, whichmod] < cutoff[m] # how many meet cutoff criterion
+    # } else {
+    #   dat[, whichmod] <-
+    #     dat[, whichmod] > cutoff[m] # how many meet cutoff criterion
+    # }
+
     if (lower.tail[m]) {
-      dat[, whichmod] <-
-        dat[, whichmod] < cutoff[m] # how many meet cutoff criterion
+      dat <-
+        dat < cutoff[m] # how many meet cutoff criterion
     } else {
-      dat[, whichmod] <-
-        dat[, whichmod] > cutoff[m] # how many meet cutoff criterion
+      dat <-
+        dat > cutoff[m] # how many meet cutoff criterion
     }
 
 
     # Extract just the selected models
-    tmp <- dat[, whichmod]
+    #tmp <- dat[, whichmod]
+    tmp <- dat
 
     # If samereps, then omit if not all reps converged
     if (samereps) {
@@ -469,7 +497,7 @@ intersect.fitprop <- function(x,
     }
 
     # Add column names for models
-    colnames(tmp) <- mod.lab
+    #colnames(tmp) <- mod.lab
 
     # Add column for models that never fit
     tmp$None <- rowSums(tmp[,mod.lab]) == 0
@@ -561,7 +589,7 @@ ranks.fitprop <- function(x,
   name <- NULL
 
   dat <- x
-  dat <- dat[, whichmod]
+  #dat <- dat[, whichmod]
   nmod <- ncol(dat)
   nrep <- nrow(dat)
 
@@ -616,7 +644,6 @@ ranks.fitprop <- function(x,
     graph <- graph + scale_x_reverse(limits = c(xlim[2], xlim[1]), breaks = xseq)
   }
 
-  graph
 
   return(graph)
 }
@@ -660,7 +687,7 @@ pairwise.fitprop <- function(x,
   ymax <- group <- NULL
 
   dat <- x
-  dat <- dat[, whichmod]
+  #dat <- dat[, whichmod]
   nmod <- ncol(dat)
   nrep <- nrow(dat)
 
