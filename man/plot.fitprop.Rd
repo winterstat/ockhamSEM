@@ -16,6 +16,7 @@
   cutoff = NULL,
   lower.tail = NULL,
   mod.lab = NULL,
+  ties.method = "min",
   mod.brewer.pal = "Set1"
 )
 }
@@ -43,10 +44,10 @@ is not yet operational.}
 
 \item{mod.lab}{Optional character vector of labels for each model.}
 
+\item{ties.method}{Optional character value for use with \code{type = "rank"} specifying method indicating the method for treating ties in the rank function (see \code{\link[base]{rank}}).}
+
 \item{mod.brewer.pal}{Optional string corresponding to the palette from RColorBrewer to use for the different models. e.g.,
 see \code{\link[RColorBrewer]{display.brewer.all}}.}
-
-\item{ties.method}{Optional character value for use with \code{type = "rank"} specifying method indicating the method for treating ties in the rank function (see \code{\link[base]{rank}}).}
 }
 \description{
 `plot()` returns a plot (of type ECDF, Euler, or UpSet) for each requested fit index saved in an object of class fitprop.

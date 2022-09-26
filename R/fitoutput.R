@@ -497,7 +497,8 @@ intersect.fitprop <- function(x,
     }
 
     # Add column names for models
-    #colnames(tmp) <- mod.lab
+    tmp <- data.frame(tmp)
+    colnames(tmp) <- mod.lab
 
     # Add column for models that never fit
     tmp$None <- rowSums(tmp[,mod.lab]) == 0
@@ -517,7 +518,7 @@ intersect.fitprop <- function(x,
     order_intersect <- cbind(order_intersect, intersect = intersect)
     order_intersect$num_comma <- sapply(order_intersect$intersect, function(x) length(strsplit(x, ",")[[1]]))
 
-    freq_order <- order(order_intersect$num_comma, order(order_intersect$n, decreasing = TRUE), decreasing = FALSE)
+    freq_order <- order(order_intersect$num_comma, -rank(order_intersect$n), decreasing = FALSE)
     order_intersect <- order_intersect[freq_order,c("intersect", "n")]
 
     order_intersect$proportion <- order_intersect$n / nrow(tmp)

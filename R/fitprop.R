@@ -393,6 +393,7 @@ plot.fitprop <-
            cutoff = NULL,
            lower.tail = NULL,
            mod.lab = NULL,
+           ties.method = "min",
            mod.brewer.pal = "Set1") {
     type <- match.arg(type)
 
