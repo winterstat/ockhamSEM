@@ -158,6 +158,11 @@ summary(res)
 
 #### Summarize intersections of FP:
 
+The tables below show the number of datasets and proportion of data
+space that are fit well by different combinations of models. Here,
+‘None’ reflects the part of the data space that was not fit well by any
+of the models.
+
 ``` r
 intersect.fitprop(res, cutoff = c(.09, .95), lower.tail = c(TRUE, FALSE))
 #> 
@@ -180,23 +185,39 @@ intersect.fitprop(res, cutoff = c(.09, .95), lower.tail = c(TRUE, FALSE))
 
 #### Graph Output:
 
+There are several options for visualizing the fitting propensity
+analysis results. First, we can look at the ECDF plot comparing the
+cumulative densities of the fit indices across models.
+
 ``` r
 plot(res, type = "ecdf", whichfit = "cfi", lower.tail = FALSE)
 ```
 
 ![](README_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
 
+We can also request a Euler plot, which shows what percentage of the
+data space is fit well by each model (based on a specific cutoff value),
+and to what extent different models’ FP overlap.
+
 ``` r
 plot(res, type = "euler", whichfit = "srmr", cutoff = .09, lower.tail = TRUE)
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-9-1.png)<!-- --> In some
+cases, it may be important to see if the ranking of models in terms of
+their FP depends on the specific cutoff value used. The ‘rank’ plot
+compares the models’ ranking across the range of the fit index value.
+Here, we can see that Model 2 always has higher FP than Model 1.
 
 ``` r
 plot(res, type = "rank", whichfit = "srmr", cutoff = .09, lower.tail = TRUE)
 ```
 
 ![](README_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
+
+Finally, we can request a pairwise plot to see how large of a difference
+in FP (in terms of proportion) exists between two models across the
+range of the fit index.
 
 ``` r
 plot(res, type = "pairwise", whichmod = c(1,2), whichfit = "srmr", cutoff = .09, lower.tail = TRUE)

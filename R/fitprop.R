@@ -420,8 +420,9 @@ plot.fitprop <-
     }
 
     if(!is.null(lower.tail) & length(whichfit) != length(lower.tail)) {
-      message("'whichfit' and 'lower.tail' do not match in number of elements. Mismatch may exist.")
+      message("'whichfit' and 'lower.tail' do not match in number of elements.")
     }
+
 
     if (is.null(lower.tail)) {
       lower.tail <- rep(TRUE, length(whichfit))

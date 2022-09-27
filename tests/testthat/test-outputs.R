@@ -28,7 +28,7 @@ mod4a.fit <- sem(mod4a, sample.cov=temp_mat, sample.nobs=500, optim.force.conver
 # Run FP analysis
 res <- run.fitprop(mod1a.fit, mod2a.fit, mod3a.fit, mod4a.fit,
                    fit.measure=c("srmr","cfi", "rmsea"),
-                   rmethod="onion",reps=100)
+                   rmethod="onion",reps=20)
 
 summary(res)
 #saveRDS(res, file = "fp_test.RDS")
@@ -39,6 +39,9 @@ intersect.fitprop(res)
 
 # Does this work and not show messages?
 intersect.fitprop(res, cutoff = c(.08, .95, .06),
+                  lower.tail = c(TRUE, FALSE, TRUE))
+
+intersect.fitprop(res, cutoff = c(.08, .95),
                   lower.tail = c(TRUE, FALSE, TRUE))
 
 # Does this work without showing messages? Do you see 3 plots?

@@ -330,10 +330,10 @@ ecdf.fitprop <- function(x,
         xend = cutoff[m],
         yend = Inf
       ),
-      size = .7,
-      linetype = "dotted"
+      size = .3,
+      linetype = "solid"
     ) +
-      labs(caption = paste0("Vertical dotted line represents cutoff value: ", cutoff[m]))
+      labs(caption = paste0("Vertical line represents cutoff value: ", cutoff[m]))
   }
 
   graph <- graph +
@@ -343,7 +343,8 @@ ecdf.fitprop <- function(x,
     theme(
       legend.title = element_blank(),
       legend.text = element_text(size = 10),
-      text = element_text(family = "sans")
+      text = element_text(family = "sans"),
+      plot.caption.position = "plot"
     )
 
   return(graph)
@@ -433,7 +434,11 @@ intersect.fitprop <- function(x,
   }
 
   if(!is.null(lower.tail) & length(whichfit) != length(lower.tail)) {
-    message("'whichfit' and 'lower.tail' do not match in number of elements. Mismatch may exist.")
+    stop("'whichfit' and 'lower.tail' do not match in number of elements. Mismatch may exist.")
+  }
+
+  if(!is.null(cutoff) & length(whichfit) != length(cutoff)) {
+    stop("'whichfit' and 'cutoff' do not match in number of elements.")
   }
 
   if (is.null(lower.tail)) {
@@ -640,9 +645,11 @@ ranks.fitprop <- function(x,
     )
 
   if (lower.tail[m]) {
-    graph <- graph + scale_x_continuous(limits = c(xlim[1], xlim[2]), breaks = xseq)
+    graph <- graph + scale_x_continuous(limits = c(xlim[1], xlim[2]), breaks = xseq) +
+      theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
   } else {
-    graph <- graph + scale_x_reverse(limits = c(xlim[2], xlim[1]), breaks = xseq)
+    graph <- graph + scale_x_reverse(limits = c(xlim[2], xlim[1]), breaks = xseq) +
+      theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
   }
 
 
