@@ -449,7 +449,64 @@ plot.fitprop <-
       colnames(dat) <- mod.lab
       #dat$id <- 1:nrow(dat)
 
-      if (type == "euler") {
+      # generate plots
+      if(type=="ecdf"){
+        if(samereps){
+          dat<-na.omit(dat)
+        }
+        dat<-gather(dat,"variable","value",whichmod)
+        graph<-ggplot(dat,aes(x=.data$value))+
+          stat_ecdf(aes(linetype=.data$variable, color=.data$variable),na.rm=TRUE,size=.7) +
+          scale_color_brewer(palette=mod.brewer.pal)
+
+        graph <- graph + guides(color=guide_legend(title="Model"))
+        graph <- graph + guides(linetype=guide_legend(title="Model"))
+
+        if(lower.tail[m]){
+          graph<-graph+ xlim(xlim[1],xlim[2])
+        } else {
+          graph<-graph+ xlim(xlim[2],xlim[1])
+        }
+        graph<-graph+xlab(fm) + ylab("Cumulative Probability") #theme(legend.title=element_blank())+
+
+      } else if (type=="euler"){
+        if(lower.tail[m]){
+          dat[,whichmod]<-dat[,whichmod]<cutoff # how many meet cutoff criterion
+        } else {
+          dat[,whichmod]<-dat[,whichmod]>cutoff # how many meet cutoff criterion
+        }
+        tmp<-cbind(data.frame(Total=rep(TRUE,nrow(dat))),dat[,whichmod])
+        if(samereps){
+          tmp<-na.omit(tmp)
+        }
+        colnames(tmp)<-c("Total",whichmod)
+        eulerfit<-euler(tmp)
+        graph<-plot(eulerfit)
+      } else if (type=="nVennR"){
+
+        stop("nVennR is not yet functional")
+
+        dat<-na.omit(dat)
+        tmp<-list()
+        indx<-1
+        for(j in whichmod){
+          if(lower.tail[m]){
+            tmp[[indx]]<-dat$id[dat[,j]<cutoff]
+          } else {
+            tmp[[indx]]<-dat$id[dat[,j]>cutoff]
+          }
+          indx<-indx+1
+        }
+        tmp[[indx]]<-dat$id # last group is the total
+        #tmp<-cbind(data.frame(Total=rep(TRUE,nrow(dat))),dat[,whichmod])
+        #if(samereps){
+        #  tmp<-na.omit(tmp)
+        #}
+        #colnames(tmp)<-c("Total",whichmod)
+        #eulerfit<-euler(tmp)
+        #graph<-plot(eulerfit)
+        graph<-plotVenn(tmp,nCycles=5000,showPlot=F,sNames=c(mod.lab,"Total"))
+      } else if (type == "euler2") {
         if(!is.null(cutoff) & length(whichfit) != length(cutoff)) {
           message("'whichfit' and 'cutoff' do not match in number of elements. Mismatch may exist.")
         }
@@ -473,7 +530,7 @@ plot.fitprop <-
           mod.brewer.pal = mod.brewer.pal
         )
 
-      } else if (type == "ecdf") {
+      } else if (type == "ecdf2") {
         if(!is.null(cutoff) & length(whichfit) != length(cutoff)) {
           message("'whichfit' and 'cutoff' do not match in number of elements. Mismatch may exist.")
         }
@@ -524,8 +581,6 @@ plot.fitprop <-
           mod.brewer.pal = mod.brewer.pal
         )
 
-      } else if (type == "nVennR") {
-        stop("nVennR is not yet functional")
       }
 
       # do something with plot

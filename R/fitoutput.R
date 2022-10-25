@@ -183,7 +183,7 @@ euler.fitprop <- function(x,
   text_curve <-
     dplyr::filter(all.ellipse, model == "Complete Data Space" &
                     x < 0 & y > 0)
-  text_curve$label_text <- "All Possible Data*"
+  text_curve$label_text <- "Data Space*"
   text_curve <- text_curve[, c("x", "y", "label_text")]
 
   # Create graph
@@ -472,16 +472,6 @@ intersect.fitprop <- function(x,
     dat <- as.data.frame(dat)
     dat <- dat[,whichmod]
     colnames(dat) <- mod.lab
-    #dat$id <- 1:nrow(dat)
-
-    # Categorize fit index values
-    # if (lower.tail[m]) {
-    #   dat[, whichmod] <-
-    #     dat[, whichmod] < cutoff[m] # how many meet cutoff criterion
-    # } else {
-    #   dat[, whichmod] <-
-    #     dat[, whichmod] > cutoff[m] # how many meet cutoff criterion
-    # }
 
     if (lower.tail[m]) {
       dat <-
@@ -493,7 +483,6 @@ intersect.fitprop <- function(x,
 
 
     # Extract just the selected models
-    #tmp <- dat[, whichmod]
     tmp <- dat
 
     # If samereps, then omit if not all reps converged
@@ -521,7 +510,8 @@ intersect.fitprop <- function(x,
     )
 
     order_intersect <- cbind(order_intersect, intersect = intersect)
-    order_intersect$num_comma <- sapply(order_intersect$intersect, function(x) length(strsplit(x, ",")[[1]]))
+    order_intersect$num_comma <- sapply(order_intersect$intersect,
+                                        function(x) length(strsplit(x, ",")[[1]]))
 
     freq_order <- order(order_intersect$num_comma, -rank(order_intersect$n), decreasing = FALSE)
     order_intersect <- order_intersect[freq_order,c("intersect", "n")]
